@@ -26,7 +26,8 @@ const Earth: React.FC = () => {
       const data = JSON.parse(event.data);
       if (data.type === "init") {
         // Reçoit tous les points actuels à la connexion
-        setPoints(data.points);
+        const points = data.inner_weathers.map((iw: any) => iw.point);
+        setPoints(points);
       } else {
         // Reçoit un nouveau point en temps réel
         setPoints(prev => [...prev, data]);
