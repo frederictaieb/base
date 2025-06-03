@@ -6,6 +6,8 @@ import os
 from dotenv import load_dotenv
 from app.config.settings import settings
 from typing import List, Dict, Any
+from app.api.routes import add_point
+from app.models.point import Point
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +67,12 @@ async def xrp_listener():
                     logger.info(f"✅ Transaction detected: {tx_hash[:21]}[...]")
                     parsed_memos = parse_memo(data["transaction"]["Memos"])
                     logger.info(f"📝 Parsed memo: {parsed_memos}")
+                    await add_point(Point(
+                        lat=parsed_memos["lat"],
+                        lng=parsed_memos["lng"],
+                    ))
+     
+
 
     except Exception as e:
         logger.error(f"❌ Error in XRP Listener : {e}")

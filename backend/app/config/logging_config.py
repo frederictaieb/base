@@ -1,5 +1,6 @@
 # logging_config.py
 import logging
+from pprint import pformat
 
 class CustomFormatter(logging.Formatter):
     def format(self, record):
