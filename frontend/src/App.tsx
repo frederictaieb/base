@@ -1,15 +1,16 @@
-import './App.css';
-import React from 'react';
-import Earth from './components/Earth';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import AddPoint from "./pages/AddPoint";
 
 const App: React.FC = () => {
   return (
-    <>
-      <div id="header">Welcome on the Earth</div>
-      <div id="canvas-container">
-        <Earth />
-      </div>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/tools/add-point" element={<AddPoint />} />
+      </Routes>
+    </Router>
   );
 };
 
