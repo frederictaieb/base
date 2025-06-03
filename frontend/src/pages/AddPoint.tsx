@@ -36,8 +36,10 @@ const AddPoint: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "2rem auto", padding: 20, background: "#f9f9f9", borderRadius: 8 }}>
-      <h1>Ajouter un Point</h1>
+    <div>
+      <h1 className="text-3xl underline">
+        Ajouter un Point
+      </h1>
       <form onSubmit={handleSubmit}>
       <label>
           Latitude:

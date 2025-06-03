@@ -49,8 +49,8 @@ const Earth: React.FC = () => {
         pointsData={points}
         pointLat={(d) => (d as Point).lat}
         pointLng={(d) => (d as Point).lng}
-        pointAltitude={0.02}
-        pointColor={() => 'red'}
+        pointAltitude={0.1}
+        pointColor={() => 'lightgreen'}
       />
     </div>
   );
