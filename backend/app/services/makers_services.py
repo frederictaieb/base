@@ -1,7 +1,7 @@
 from fastapi import WebSocket
 from typing import List
 
-class ConnectionManager:
+class MarkersManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
 
@@ -16,4 +16,4 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_json(message)
 
-manager = ConnectionManager()
+markers_emitter = MarkersManager()
