@@ -16,7 +16,7 @@ const Navbar: React.FC = () => (
     boxSizing: "border-box"
   }}>
     <Link to="/" style={{ color: "#fff", textDecoration: "none" }}>Home</Link>
-    <Link to="/tools/add-point" style={{ color: "#fff", textDecoration: "none" }}>Add Point</Link>
+    <Link to="/add-marker" style={{ color: "#fff", textDecoration: "none" }}>Add Marker</Link>
   </nav>
 );
 

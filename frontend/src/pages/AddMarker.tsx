@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const AddInnerWeather: React.FC = () => {
+const AddMarker: React.FC = () => {
   const [form, setForm] = useState({
     lat: "51.5074",
     lng: "-0.1278",
@@ -22,27 +22,29 @@ const AddInnerWeather: React.FC = () => {
     e.preventDefault();
     setMessage("");
     try {
-      const response = await fetch("http://localhost:8000/add_inner_weather", {
+      const response = await fetch("http://localhost:8000/add_marker", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            "point": {
+            "gps": {
               "lat": parseFloat(form.lat),
               "lng": parseFloat(form.lng)
             },
-            "sentences": {
-              "sentences": [
-                "string"
-              ]
+            "emotions": {
+              "joy": parseInt(form.joy),
+              "sadness": parseInt(form.sadness),
+              "anger": parseInt(form.anger),
+              "fear": parseInt(form.fear)
             },
-            "emotion_score": {
-              "joy": form.joy,
-              "sadness": form.sadness,
-              "anger": form.anger,
-              "fear": form.fear
-            }
+
+            "wisdom": {
+              "sentence_1": form.sentence_1,
+              "sentence_2": form.sentence_2,
+              "sentence_3": form.sentence_3
+            },
+
         }),
       });
       if (!response.ok) {
@@ -112,4 +114,4 @@ const AddInnerWeather: React.FC = () => {
   );
 };
 
-export default AddInnerWeather;
+export default AddMarker;

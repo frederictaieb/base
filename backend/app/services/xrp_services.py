@@ -3,9 +3,9 @@ import websockets
 import json
 import logging
 from app.config.settings import settings
-from app.models.inner_weather import Point, InnerWeather
+from app.models.markers import Marker
 from app.utils.utils import parse_memo
-from app.api.routes import add_inner_weather
+from app.api.routes import add_marker
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +37,22 @@ async def xrp_listener():
                     parsed_memos = parse_memo(data["transaction"]["Memos"])
                     logger.info(f"📝 Parsed memo: {parsed_memos}")
 
-                    await add_inner_weather(InnerWeather(
-                        point=Point(
+                    await add_marker(Marker(
+                        gps=Gps(
                             lat=parsed_memos["lat"],
                             lng=parsed_memos["lng"],
                         ),
-                        sentences=parsed_memos["sentences"],
-                        emotion_score=parsed_memos["emotion_score"]
+                        emotions=Emotions(
+                            joy=parsed_memos["joy"],
+                            sadness=parsed_memos["sadness"],
+                            anger=parsed_memos["anger"],
+                            fear=parsed_memos["fear"],
+                        ),
+                        wisdom=Wisdom(
+                            sentence_1=parsed_memos["sentence_1"],
+                            sentence_2=parsed_memos["sentence_2"],
+                            sentence_3=parsed_memos["sentence_3"],
+                        ),
                     ))
-
     except Exception as e:
         logger.error(f"❌ Error in XRP Listener : {e}")

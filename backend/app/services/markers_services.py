@@ -16,4 +16,4 @@ class MarkersManager:
         for connection in self.active_connections:
             await connection.send_json(message)
 
-markers_emitter = MarkersManager()
+markersManager = MarkersManager()

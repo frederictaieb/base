@@ -1,25 +1,25 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.models.inner_weather import inner_weathers, InnerWeather
-from app.services.makers_services import markers_emitter
+from app.models.markers import markers, Marker
+from app.services.markers_services import markersManager
 
 router = APIRouter()
 
-@router.get("/inner_weathers")
-def get_inner_weathers():
-    return inner_weathers
+@router.get("/markers")
+def get_markers():
+    return markers
 
-@router.post("/add_inner_weather")
-async def add_inner_weather(inner_weather: InnerWeather):
-    inner_weathers.append(inner_weather.dict())
-    await markers_emitter.broadcast(inner_weather.dict())
+@router.post("/add_marker")
+async def add_marker(marker: Marker):
+    markers.append(marker.dict())
+    await markersManager.broadcast(marker.dict())
     return {"status": "ok"}
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await markers_emitter.connect(websocket)
+    await markersManager.connect(websocket)
     try:
-        await websocket.send_json({"type": "init", "inner_weathers": inner_weathers})
+        await websocket.send_json({"type": "init", 'markers': markers})
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        markers_emitter.disconnect(websocket)
+        markersManager.disconnect(websocket)
