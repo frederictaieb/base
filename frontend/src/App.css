@@ -1,18 +1,6 @@
-#header {
-  width: 100vw;
-  height: 10vh;
-  background-color: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1rem;
-  margin-top: 20px;
-  color: white;
-}
-
 #canvas-container {
   width: 100vw;
-  height: 90vh;
+  height: 100vh;
   background-color: white;
 }
 
