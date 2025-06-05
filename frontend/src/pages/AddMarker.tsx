@@ -42,8 +42,7 @@ const AddMarkerDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
         }),
       });
       if (!response.ok) throw new Error("Erreur lors de l'envoi du point");
-      setMessage("Point ajouté avec succès !");
-      onClose();
+      setMessage("Marker added!");
     } catch (error) {
       setMessage("Erreur : " + error);
     }
@@ -105,7 +104,7 @@ const AddMarkerDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
         >
           Envoyer
         </button>
-        {message && <p className="sm:col-span-2 mt-2 text-center text-sm text-red-600 dark:text-red-400">{message}</p>}
+        {message && <p className="sm:col-span-2 mt-2 text-center text-sm text-green-600">{message}</p>}
       </form>
     </Drawer>
   );

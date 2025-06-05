@@ -5,6 +5,8 @@ from app.services import xrp_services
 import logging
 import asyncio
 from app.config.logging_config import setup_logging
+from app.services import humeai_services
+from app.config.settings import settings
 
 setup_logging()
 
