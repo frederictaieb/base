@@ -8,21 +8,56 @@ import RadioPlayer from "./components/RadioPlayer";
 const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Par défaut muté
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeDuration = 2400; // ms (4 secondes)
+  const fadeSteps = 16;
 
-  // Fonction pour toggle le mute
-  const toggleMute = () => {
-    setIsMuted((prev) => {
-      const newMuted = !prev;
-      if (audioRef.current) {
-        audioRef.current.muted = newMuted;
-        // Si on unmute, il faut peut-être relancer la lecture (pour certains navigateurs)
-        if (!newMuted) {
-          audioRef.current.play().catch(() => {});
-        }
+  // Fade le volume de start à end
+  const fadeVolume = (start: number, end: number, callback?: () => void) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const step = (end - start) / fadeSteps;
+    let current = start;
+    let count = 0;
+
+    const fade = () => {
+      if (!audio) return;
+      current += step;
+      count++;
+      const min = Math.min(start, end);
+      const max = Math.max(start, end);
+      audio.volume = Math.max(min, Math.min(max, current));
+      if ((step > 0 && current < end) || (step < 0 && current > end)) {
+        setTimeout(fade, fadeDuration / fadeSteps);
+      } else {
+        audio.volume = Math.max(min, Math.min(max, end));
+        if (callback) callback();
       }
-      return newMuted;
-    });
+    };
+
+    fade();
+  };
+
+  // Fonction pour toggle le mute avec fade
+  const toggleMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isMuted) {
+      // On change l'icône tout de suite
+      setIsMuted(false);
+      // Fade in
+      audio.muted = false;
+      audio.volume = 0;
+      audio.play().catch(() => {});
+      fadeVolume(0, 0.25);
+    } else {
+      // On change l'icône tout de suite
+      setIsMuted(true);
+      // Fade out
+      fadeVolume(audio.volume, 0, () => {
+        audio.muted = true;
+      });
+    }
   };
 
   return (
