@@ -5,14 +5,16 @@ type NavbarProps = {
   onOpenDrawer: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
+  isFading: boolean;
 };
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenDrawer, isMuted, onToggleMute }) => (
+const Navbar: React.FC<NavbarProps> = ({ onOpenDrawer, isMuted, onToggleMute, isFading }) => (
   <nav className="fixed top-0 left-0 w-full z-50 bg-black flex justify-end items-center px-6 py-3">
     <button
       onClick={onToggleMute}
-      className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 transition mr-2"
+      className={`flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 transition mr-2 ${isFading ? 'opacity-50 cursor-not-allowed' : ''}`}
       aria-label={isMuted ? "Unmute Radio" : "Mute Radio"}
+      disabled={isFading}
     >
       {isMuted ? (
         <VolumeX size={28} color="white" strokeWidth={1} />

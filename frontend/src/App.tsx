@@ -11,11 +11,13 @@ const App: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeDuration = 2400; // ms (4 secondes)
   const fadeSteps = 16;
+  const [isFading, setIsFading] = useState(false);
 
   // Fade le volume de start à end
   const fadeVolume = (start: number, end: number, callback?: () => void) => {
     const audio = audioRef.current;
     if (!audio) return;
+    setIsFading(true);
     const step = (end - start) / fadeSteps;
     let current = start;
     let count = 0;
@@ -31,6 +33,7 @@ const App: React.FC = () => {
         setTimeout(fade, fadeDuration / fadeSteps);
       } else {
         audio.volume = Math.max(min, Math.min(max, end));
+        setIsFading(false);
         if (callback) callback();
       }
     };
@@ -52,11 +55,12 @@ const App: React.FC = () => {
       fadeVolume(0, 0.25);
     } else {
       // On change l'icône tout de suite
-      setIsMuted(true);
+
       // Fade out
       fadeVolume(audio.volume, 0, () => {
         audio.muted = true;
       });
+      setIsMuted(true);
     }
   };
 
@@ -66,6 +70,7 @@ const App: React.FC = () => {
         onOpenDrawer={() => setDrawerOpen(true)}
         isMuted={isMuted}
         onToggleMute={toggleMute}
+        isFading={isFading}
       />
       <RadioPlayer audioRef={audioRef} />
       <AddMarkerDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
