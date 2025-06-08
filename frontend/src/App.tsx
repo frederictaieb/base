@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import AddMarkerDrawer from "./pages/AddMarker";
 import Navbar from "./components/Navbar";
 import RadioPlayer from "./components/RadioPlayer";
+import TextFormPage from "./pages/text";
 
 const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -76,6 +77,7 @@ const App: React.FC = () => {
       <AddMarkerDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/text" element={<TextFormPage />} />
       </Routes>
     </Router>
   );
