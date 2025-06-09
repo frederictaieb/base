@@ -59,12 +59,11 @@ async def scrub(file):
     logger.info(f"*** SCRUB: {text} *** ")
     return text.strip()
 
-async def to_phrases(file):
-    texte = await scrub(file)
-    # Découpe en phrases avec segtok
-    phrases = [p.strip() for p in split_single(texte) if p.strip()]
-    logger.info(f"Phrases: {phrases}")
-    return {"phrases": phrases}
+async def to_phrases(text: str) -> list[str]:
+    nlp = spacy.load("en_core_web_sm") 
+    doc = nlp(text)
+    phrases = [sent.text.strip() for sent in doc.sents]
+    return phrases
 
 # TO SUMMARY
 async def to_summary(text: str) -> str:
@@ -153,9 +152,7 @@ async def to_emotions(text: str) -> list[str]:
     json_lines = []
     classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=7)
     
-    nlp = spacy.load("en_core_web_sm") 
-    doc = nlp(text)
-    phrases = [sent.text.strip() for sent in doc.sents]
+    phrases = await to_phrases(text)
 
     for phrase in phrases:
         logger.info(f"*** PHRASE: {phrase} ***")
@@ -169,7 +166,7 @@ async def to_emotions(text: str) -> list[str]:
         }
         json_lines.append(json_line)
 
-    logger.info(f"Emotions: {json_lines}")
+    logger.info(f"*** TO EMOTIONS: {json_lines} ***")
     return {"emotions": json_lines}
 
 async def txt_to_emo(file):
@@ -178,7 +175,7 @@ async def txt_to_emo(file):
     summary = await to_summary(texte)
     wisdom = await to_wisdom(texte)
     emotions = await to_emotions(texte)
-    #hader = await to_shader(emotions.get("emotions"))
+    to_shader(emotions.get("emotions"))
 
 
     return {
@@ -230,11 +227,10 @@ def save_heatmap(df, output_path):
     logging.info(f"Heatmap saved")
 
 def to_shader(emotions, output_path="heatmap.png"):
-    logger.info(f"Emotions: {emotions}")
-    return {"shader": "shader"}
-    #df_long = process_data_json(data)
-    #df_wide = analyze_emotions(df_long)
-    #save_heatmap(df_wide, output_path)
+    logger.info(f"*** SHADER: {emotions} ***")
+    df_long = process_data_json(emotions)
+    df_wide = analyze_emotions(df_long)
+    save_heatmap(df_wide, output_path)
 
 
 
