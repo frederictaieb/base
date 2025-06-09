@@ -11,6 +11,9 @@ import mimetypes
 import shutil
 import os
 
+import io
+
+
 import mimetypes
 import shutil
 import os
@@ -42,7 +45,7 @@ EMOTION_COLORS = {
 
 EMOTION_ORDER = ['neutral', 'surprise', 'sadness', 'disgust', 'joy', 'fear', 'anger']
 
-# TO LINES
+# Clean text from file and return a string
 async def scrub(file):
     contents = await file.read()
     text = contents.decode("utf-8", errors="replace")
@@ -59,6 +62,7 @@ async def scrub(file):
     logger.info(f"*** SCRUB: {text} *** ")
     return text.strip()
 
+# Split text into phrases
 async def to_phrases(text: str) -> list[str]:
     nlp = spacy.load("en_core_web_sm") 
     doc = nlp(text)
@@ -66,7 +70,9 @@ async def to_phrases(text: str) -> list[str]:
     return phrases
 
 # TO SUMMARY
-async def to_summary(text: str) -> str:
+# Take a text
+# Return a summary
+async def text_to_summary(text: str) -> str:
     if len(text.split()) < 30:
         logger.info(f"*** SUMMARY: {text} ***")
         return {"summary": text}  # texte trop court à résumer
@@ -97,7 +103,16 @@ async def to_summary(text: str) -> str:
     except requests.exceptions.RequestException as e:
         return {"summary": f"Erreur lors de la génération via Ollama: {e}"}
 
-# TO WISDOM
+# TO SUMMARY
+# Take a file
+# Return a summary
+async def textfile_to_summary(file) -> list[str]:
+    text = await scrub(file)
+    return await text_to_summary(text)
+
+# format IA Answer to a list of 3 sentences
+# Take a text
+# Return a list of 3 sentences
 def extract_wisdom_list(text: str) -> list[str]:
     # Try to match numbered sentences, with or without quotes
     numbered = re.findall(r'\d+\.\s*["""]?(.*?)["""]?(?:\n|$)', text)
@@ -118,7 +133,10 @@ def extract_wisdom_list(text: str) -> list[str]:
     sentences = [s.strip() for s in re.split(r'[.?!]\s+', text) if s.strip()]
     return sentences[:3]
 
-async def to_wisdom(text: str) -> list[str]:
+# TO WISDOM
+# Take a text
+# Return a list of 3 sentences
+async def text_to_wisdom(text: str) -> list[str]:
     prompt = (
         "In the text between curly braces, find a maximum of 3 important phrases, full of wisdom and lessons about life:\n"
         f"{{{text}}}\n"
@@ -148,7 +166,17 @@ async def to_wisdom(text: str) -> list[str]:
     except requests.exceptions.RequestException as e:
         return {"wisdom": f"Erreur lors de la génération via Ollama: {e}"}
 
-async def to_emotions(text: str) -> list[str]:
+# TO WISDOM
+# Take a file
+# Return a list of 3 sentences
+async def textfile_to_wisdom(file) -> list[str]:
+    text = await scrub(file)
+    return await text_to_wisdom(text)
+
+# TO EMOTIONS
+# Take a text
+# Return a list of emotions
+async def text_to_emotions(text: str) -> list[str]:
     json_lines = []
     classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=7)
     
@@ -168,22 +196,17 @@ async def to_emotions(text: str) -> list[str]:
 
     logger.info(f"*** TO EMOTIONS: {json_lines} ***")
     return {"emotions": json_lines}
-
-async def txt_to_emo(file):
-    texte = await scrub(file)
-
-    summary = await to_summary(texte)
-    wisdom = await to_wisdom(texte)
-    emotions = await to_emotions(texte)
-    to_shader(emotions.get("emotions"))
-
-
-    return {
-        "summary": summary.get("summary"), 
-        "wisdom": wisdom.get("wisdom"),
-        "emotions": emotions.get("emotions")
-    }
  
+# TO EMOTIONS
+# Take a file
+# Return a list of emotions
+async def textfile_to_emotions(file) -> list[str]:
+    text = await scrub(file)
+    return await text_to_emotions(text)
+
+# Process data from json to dataframe
+# Take a list of emotions
+# Return a dataframe
 def process_data_json(data):
     rows = []
     for i, entry in enumerate(data):
@@ -196,11 +219,17 @@ def process_data_json(data):
     df = pd.DataFrame(rows)
     return df
 
+# Analyze emotions
+# Take a dataframe
+# Return a dataframe with dominant emotion
 def analyze_emotions(df):
     pivot = df.pivot(index="index", columns="emotion", values="score").fillna(0)
     pivot["dominant"] = pivot.idxmax(axis=1)
     return pivot
 
+# Interpolate color
+# Take a color and a score
+# Return a color
 def interpolate_color(color_hex, score, pale_factor=0.8):
     color_rgb = np.array(mcolors.to_rgb(color_hex))
     white_rgb = np.array([1, 1, 1])
@@ -208,11 +237,19 @@ def interpolate_color(color_hex, score, pale_factor=0.8):
     result_rgb = pale_rgb * (1 - score) + color_rgb * score
     return result_rgb
 
-def save_heatmap(df, output_path):
-    if "dominant" in df.columns:
-        data = df.drop(columns="dominant")
+# TO HEATMAP
+# Take a list of emotions
+# Return a heatmap
+def text_to_heatmap(emotions, output_path="heatmap.png", to_save=True):
+    logger.info(f"*** SHADER: {emotions} ***")
+
+    df_long = process_data_json(emotions)
+    df_wide = analyze_emotions(df_long)
+
+    if "dominant" in df_wide.columns:
+        data = df_wide.drop(columns="dominant")
     else:
-        data = df
+        data = df_wide
     emotions = [e for e in EMOTION_ORDER if e in data.columns]
     data = data[emotions]
     n_emotions = len(emotions)
@@ -223,14 +260,40 @@ def save_heatmap(df, output_path):
         for j in range(n_phrases):
             score = data.iloc[j][emo]
             img[i, j, :] = interpolate_color(color, score)
-    plt.imsave(output_path, img)
-    logging.info(f"Heatmap saved")
+    if to_save:
+        plt.imsave(output_path, img)
+        logging.info(f"Heatmap saved at {output_path}")
+        return output_path
+    else:
+        buffer = io.BytesIO()
+        plt.imsave(buffer, img, format='png')
+        buffer.seek(0)
+        return buffer
 
-def to_shader(emotions, output_path="heatmap.png"):
-    logger.info(f"*** SHADER: {emotions} ***")
-    df_long = process_data_json(emotions)
-    df_wide = analyze_emotions(df_long)
-    save_heatmap(df_wide, output_path)
+# TO TXT TO EMO
+# Take a file
+# Return a dictionary with summary, wisdom and emotions
+async def textfile_to_heatmap(file):
+    texte = await scrub(file)
+    emotions = await text_to_emotions(texte)
+    return text_to_heatmap(emotions.get("emotions"), to_save=False)
 
+# TO TXT TO EMO
+# Take a file
+# Return a dictionary with summary, wisdom and emotions
+async def textfile_to_emo(file):
+    texte = await scrub(file)
+
+    summary = await text_to_summary(texte)
+    wisdom = await text_to_wisdom(texte)
+    emotions = await text_to_emotions(texte)
+    text_to_heatmap(emotions.get("emotions"), output_path="heatmap.png", to_save=True)
+
+
+    return {
+        "summary": summary.get("summary"), 
+        "wisdom": wisdom.get("wisdom"),
+        "emotions": emotions.get("emotions")
+    }
 
 
