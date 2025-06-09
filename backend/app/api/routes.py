@@ -32,9 +32,17 @@ class OutputData(BaseModel):
 class WisdomResponse(BaseModel):
     wisdom: List[str]
 
+class EmotionScore(BaseModel):
+    label: str
+    score: float
+
+class PhraseEmotions(BaseModel):
+    emotions: List[EmotionScore]
+
 class EmoResponse(BaseModel):
     summary: str
     wisdom: List[str]
+    emotions: List[PhraseEmotions] 
 
 # Take a file
 # Return a list of lines

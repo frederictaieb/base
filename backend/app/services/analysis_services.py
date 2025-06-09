@@ -65,7 +65,6 @@ async def to_phrases(file):
     phrases = [p.strip() for p in split_single(texte) if p.strip()]
     return {"phrases": phrases}
 
-
 # TO SUMMARY
 async def to_summary(text: str) -> str:
     if len(text.split()) < 30:
@@ -148,12 +147,36 @@ async def to_wisdom(text: str) -> list[str]:
     except requests.exceptions.RequestException as e:
         return {"wisdom": f"Erreur lors de la génération via Ollama: {e}"}
 
+async def to_emotions(phrases: str) -> list[str]:
+    json_lines = []
+    classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=7)
+    
+    for phrase in phrases:
+        phrase = phrase.strip()
+        if not phrase:
+            continue
+
+        results = classifier(phrase)[0]
+        json_line = {
+            "emotions": [{"label": res["label"], "score": res["score"]} for res in results]
+        }
+        json_lines.append(json_line)
+
+    logger.info(f"Emotions: {json_lines}")
+    return {"emotions": json_lines}
 
 async def txt_to_emo(file):
     texte = await scrub(file)
+
     summary = await to_summary(texte)
     wisdom = await to_wisdom(texte)
-    return {"summary": summary.get("summary"), "wisdom": wisdom.get("wisdom")}
+    emotions = await to_emotions(texte)
+
+    return {
+        "summary": summary.get("summary"), 
+        "wisdom": wisdom.get("wisdom"),
+        "emotions": emotions.get("emotions")
+    }
     
 def generate_emotional_report_from_textfile(path):
     nlp = spacy.load("en_core_web_md")
