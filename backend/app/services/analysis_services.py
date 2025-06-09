@@ -20,8 +20,8 @@ from typing import Dict
 
 import logging
 import re
-from segtok import tokenizer
-from segtok.segmenter import split_single
+
+import spacy
 import requests
 
 from app.config.logging_config import setup_logging
@@ -44,7 +44,6 @@ EMOTION_ORDER = ['neutral', 'surprise', 'sadness', 'disgust', 'joy', 'fear', 'an
 
 # TO LINES
 async def scrub(file):
-    logger.info(f"Cleaning file: {file.filename}")
     contents = await file.read()
     text = contents.decode("utf-8", errors="replace")
     # Supprime les séquences échappées et les caractères de contrôle
@@ -57,17 +56,20 @@ async def scrub(file):
     text = re.sub(r' +', ' ', text)
     # Nettoie les espaces superflus autour des sauts de ligne
     text = re.sub(r' *\n *', '\n', text)
+    logger.info(f"*** SCRUB: {text} *** ")
     return text.strip()
 
 async def to_phrases(file):
     texte = await scrub(file)
     # Découpe en phrases avec segtok
     phrases = [p.strip() for p in split_single(texte) if p.strip()]
+    logger.info(f"Phrases: {phrases}")
     return {"phrases": phrases}
 
 # TO SUMMARY
 async def to_summary(text: str) -> str:
     if len(text.split()) < 30:
+        logger.info(f"*** SUMMARY: {text} ***")
         return {"summary": text}  # texte trop court à résumer
 
     prompt = (
@@ -90,6 +92,7 @@ async def to_summary(text: str) -> str:
         )
         response.raise_for_status()
         generated = response.json()["response"].strip()
+        logger.info(f"*** SUMMARY: {generated} ***")
         return {"summary": generated}
 
     except requests.exceptions.RequestException as e:
@@ -138,20 +141,24 @@ async def to_wisdom(text: str) -> list[str]:
         )
         response.raise_for_status()
         generated = response.json()["response"].strip()
-        logger.info(f"Generated wisdom: {generated}")
 
         wisdom_list = extract_wisdom_list(generated)
-        logger.info(f"Extracted wisdom: {wisdom_list}")
+        logger.info(f"*** WISDOM: {wisdom_list} ***")
         return {"wisdom": wisdom_list}
 
     except requests.exceptions.RequestException as e:
         return {"wisdom": f"Erreur lors de la génération via Ollama: {e}"}
 
-async def to_emotions(phrases: str) -> list[str]:
+async def to_emotions(text: str) -> list[str]:
     json_lines = []
     classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=7)
     
+    nlp = spacy.load("en_core_web_sm") 
+    doc = nlp(text)
+    phrases = [sent.text.strip() for sent in doc.sents]
+
     for phrase in phrases:
+        logger.info(f"*** PHRASE: {phrase} ***")
         phrase = phrase.strip()
         if not phrase:
             continue
@@ -171,104 +178,21 @@ async def txt_to_emo(file):
     summary = await to_summary(texte)
     wisdom = await to_wisdom(texte)
     emotions = await to_emotions(texte)
+    #hader = await to_shader(emotions.get("emotions"))
+
 
     return {
         "summary": summary.get("summary"), 
         "wisdom": wisdom.get("wisdom"),
         "emotions": emotions.get("emotions")
     }
-    
-def generate_emotional_report_from_textfile(path):
-    nlp = spacy.load("en_core_web_md")
-    classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=7)
-    json_lines = []
-
-    logger.info(f"Cleaning file: {path}")
-    with open(path, "r", encoding="utf-8") as f:
-        texte = f.read()
-    doc = nlp(texte)
-    phrases = [sent.text.strip() for sent in doc.sents]
-    logger.info(f"{len(phrases)} phrases found")
-
-    logger.info(f"Detecting emotions")
-    for phrase in phrases:
-        phrase = phrase.strip()
-        if not phrase:
-            continue
-
-        results = classifier(phrase)[0]
-        json_line = {
-            "emotions": [{"label": res["label"], "score": res["score"]} for res in results]
-        }
-        json_lines.append(json_line)
-    
-    logger.info(f"Writing output.json")
-    with open(f"txt/output.json", "w", encoding="utf-8") as outfile:     
-        json.dump(json_lines, outfile, ensure_ascii=False, indent=2)
-
-    logger.info(f"Done")
-    pass
-
-
-
-def generate_summary(text):
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-    summary = summarizer(text, max_length=100, min_length=30, do_sample=False)
-    return summary[0]['summary_text']
-
-def generate_sentences(text):
-    generator = pipeline("text2text-generation", model="t5-base")
-    prompt = "Extract 3 wise sentences: " + text
-    sentences = generator(prompt, max_length=100)[0]["generated_text"]
-    return sentences
-
-def generate_heatmap():
-    pass
-
-
-
-
-
-
-def txt2emo(path=f"txt/input.txt"):
-
-    nlp = spacy.load("en_core_web_md")
-    classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=7)
-    json_lines = []
-
-    logging.info(f"Processing file: {path}")
-    with open(path, "r", encoding="utf-8") as f:
-        texte = f.read()
-    doc = nlp(texte)
-    phrases = [sent.text.strip() for sent in doc.sents]
-    logging.info(f"Found {len(phrases)} phrases")
-
-    logging.info(f"Processing phrases")
-    for phrase in phrases:
-        phrase = phrase.strip()
-        if not phrase:
-            continue
-
-        results = classifier(phrase)[0]
-        json_line = {
-            "emotions": [{"label": res["label"], "score": res["score"]} for res in results]
-        }
-        json_lines.append(json_line)
-    
-    logging.info(f"Writing output.json")
-    with open(f"txt/output.json", "w", encoding="utf-8") as outfile:     
-        json.dump(json_lines, outfile, ensure_ascii=False, indent=2)
-
-    logging.info(f"Done")
-
+ 
 def process_data_json(data):
     rows = []
     for i, entry in enumerate(data):
-        text = entry["text"]
         for emo in entry["emotions"]:
             rows.append({
                 "index": i,
-                "text": text,
                 "emotion": emo["label"],
                 "score": emo["score"]
             })
@@ -305,16 +229,12 @@ def save_heatmap(df, output_path):
     plt.imsave(output_path, img)
     logging.info(f"Heatmap saved")
 
-def emotions2shader(path="txt/output.json", output_path="heatmap.png"):
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    df_long = process_data_json(data)
-    df_wide = analyze_emotions(df_long)
-    save_heatmap(df_wide, output_path)
+def to_shader(emotions, output_path="heatmap.png"):
+    logger.info(f"Emotions: {emotions}")
+    return {"shader": "shader"}
+    #df_long = process_data_json(data)
+    #df_wide = analyze_emotions(df_long)
+    #save_heatmap(df_wide, output_path)
 
-
-if __name__ == "__main__":
-    txt2emo ()
-    emotions2shader()
 
 
