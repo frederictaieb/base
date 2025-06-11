@@ -19,7 +19,6 @@ from app.services.storage.ipfs_services import upload_file
 
 import mimetypes
 import shutil
-import os
 
 from pydantic import BaseModel
 from typing import Dict
@@ -32,7 +31,7 @@ import requests
 
 from app.config.logging_config import setup_logging
 
-from app.services.blockchain.xrp_services import xrp_emitter
+from app.services.blockchain.xrp_emitter import xrp_emitter
 
 
 setup_logging()
