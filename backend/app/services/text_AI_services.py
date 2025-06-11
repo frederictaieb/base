@@ -15,7 +15,7 @@ import io
 import tempfile
 import asyncio
 
-from app.services.ipfs_services import upload_directory, upload_file, download_file
+from app.services.ipfs_services import upload_file
 
 import mimetypes
 import shutil

@@ -5,7 +5,10 @@ from app.config.settings import settings
 from app.config.logging_config import setup_logging
 from app.models.markers import Marker
 from app.utils.utils import parse_memo
-#from app.api.routes import add_marker
+from app.services import ipfs_services
+import uuid
+import tempfile
+import shutil
 
 import os
 from dotenv import load_dotenv
@@ -25,6 +28,9 @@ SERVER_ADDRESS = settings.XRP_SERVER_WALLET_ADDR
 XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
 
 async def xrp_listener():
+    from app.api.routes import add_marker 
+    from app.models.markers import Localisation, Emotions, Wisdom
+
     if not SERVER_ADDRESS or not XRP_WS_URI:
         logger.error("❌ SERVER_ADDRESS ou XRP_WS_URI missing in .env")
         return
@@ -49,23 +55,47 @@ async def xrp_listener():
                     parsed_memos = parse_memo(data["transaction"]["Memos"])
                     logger.info(f"📝 Parsed memo: {parsed_memos}")
 
-            #        await add_marker(Marker(
-            #            gps=Gps(
-            #                lat=parsed_memos["lat"],
-            #                lng=parsed_memos["lng"],
-            #            ),
-            #            emotions=Emotions(
-            #                joy=parsed_memos["joy"],
-            #                sadness=parsed_memos["sadness"],
-            #                anger=parsed_memos["anger"],
-            #                fear=parsed_memos["fear"],
-            #            ),
-            #            wisdom=Wisdom(
-            #                sentence_1=parsed_memos["sentence_1"],
-            #                sentence_2=parsed_memos["sentence_2"],
-            #                sentence_3=parsed_memos["sentence_3"],
-            #            ),
-            #        ))
+                    if parsed_memos.get("json_hash"):
+                        json_hash = parsed_memos.get("json_hash")
+                        heatmap_hash = parsed_memos.get("heatmap_hash")
+
+                        id = str(uuid.uuid4())
+                        temp_dir = tempfile.mkdtemp(prefix=id)
+                        json_path = os.path.join(temp_dir, "json_hash.json")
+                        heatmap_path = os.path.join(temp_dir, "heatmap_hash.png")
+                        
+                        ipfs_services.download_file(json_hash,  json_path)
+                        logger.info(f"Downloaded json file to {json_path}")
+                        ipfs_services.download_file(heatmap_hash, heatmap_path)
+                        logger.info(f"Downloaded heatmap file to {heatmap_path}")
+                        
+                        with open(json_path, "r") as f:
+                            json_data = json.load(f)
+                        logger.info(f"JSON data: {json_data}")
+
+                        #with open(heatmap_path, "r") as f:
+                        #    heatmap_data = json.load(f)
+                        #logger.info(f"Heatmap data: {heatmap_data}")
+
+                        localisation = json_data.get("localisation")
+                        logger.info(f"Localisation: {localisation}")
+
+                    await add_marker(Marker(
+                        localisation=localisation,
+
+                        emotions=Emotions(
+                            joy=0,
+                            sadness=0,
+                            anger=0,
+                            fear=0
+                        ),
+                        wisdom=Wisdom(
+                            sentence_1="",
+                            sentence_2="",
+                            sentence_3="",
+                        ),
+                    ))
+                    shutil.rmtree(temp_dir)
     except Exception as e:
         logger.error(f"❌ Error in XRP Listener : {e}")
 
