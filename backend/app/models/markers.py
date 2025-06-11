@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 from typing import List
 
-class Localisation(BaseModel):
-    lat: float
-    lng: float
+class Location(BaseModel):
+    latitude: float
+    longitude: float
 
 class Emotions(BaseModel):
     joy: int
@@ -17,7 +17,7 @@ class Wisdom(BaseModel):
    sentence_3 : str
 
 class Marker(BaseModel):
-    localisation: Localisation
+    location: Location
     emotions: Emotions
     wisdom: Wisdom
     
@@ -25,9 +25,9 @@ class Marker(BaseModel):
 # Base de données en mémoire
 markers: List[dict] = [
     {
-        "localisation":{
-            "lat":48.8566, 
-            "lng": 2.3522
+        "location":{
+            "latitude":40.7128, 
+            "longitude": -74.0060
             }, 
         "emotions":{
             "joy": 10, 

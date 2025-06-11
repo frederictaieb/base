@@ -13,8 +13,8 @@ from xrpl.transaction import submit_and_wait
 import json
 
 memo_data = {
-    "lat": "51.5072",
-    "lng": "0.1276",
+    "latitude": "51.5072",
+    "longitude": "0.1276",
     "evi": "83",
     "sentence_1": "I",
     "sentence_2": "AM",

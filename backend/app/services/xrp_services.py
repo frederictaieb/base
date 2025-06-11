@@ -29,7 +29,7 @@ XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
 
 async def xrp_listener():
     from app.api.routes import add_marker 
-    from app.models.markers import Localisation, Emotions, Wisdom
+    from app.models.markers import Location, Emotions, Wisdom
 
     if not SERVER_ADDRESS or not XRP_WS_URI:
         logger.error("❌ SERVER_ADDRESS ou XRP_WS_URI missing in .env")
@@ -77,11 +77,11 @@ async def xrp_listener():
                         #    heatmap_data = json.load(f)
                         #logger.info(f"Heatmap data: {heatmap_data}")
 
-                        localisation = json_data.get("localisation")
-                        logger.info(f"Localisation: {localisation}")
+                        location = json_data.get("location")
+                        logger.info(f"Location: {location}")
 
                     await add_marker(Marker(
-                        localisation=localisation,
+                        location=location,
 
                         emotions=Emotions(
                             joy=0,
