@@ -59,13 +59,15 @@ const TextFilePage: React.FC = () => {
     formData.append("file", file);
 
     if (coords) {
-      formData.append("latitude", coords.lat.toString());
-      formData.append("longitude", coords.lon.toString());
+      formData.append("latitude", coords ? coords.lat.toString() : "0");
+      formData.append("longitude", coords ? coords.lon.toString() : "0");
     }
 
     if (timestamp) {
-      formData.append("timestamp", timestamp);
+      formData.append("timestamp", timestamp || "");
     }
+
+    console.log([...formData.entries()])
 
     try {
       const response = await axios.post(

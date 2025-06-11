@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, FastAPI
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, FastAPI,Form
 from fastapi.responses import JSONResponse
 
 from app.models.markers import markers, Marker
@@ -71,7 +71,16 @@ async def textfile_to_heatmap_endpoint(file: UploadFile = File(...)):
 # Return emotionnal analysis, including summary, wisdom, emotions and heatmap
 #@router.post("/textfile_to_emo", response_model=EmoResponse)
 @router.post("/textfile_to_emo", response_model=HashesResponse)
-async def textfile_to_emo_endpoint(file: UploadFile = File(...), longitude: float = 0, latitude: float = 0, timestamp: str = ""):
+async def textfile_to_emo_endpoint(
+    file: UploadFile = File(...),
+    longitude: float = Form(0),
+    latitude: float = Form(0),
+    timestamp: str = Form("")
+):
+    logger.info(f"*** LONGITUDE: {longitude} ***")
+    logger.info(f"*** LATITUDE: {latitude} ***")
+    logger.info(f"*** TIMESTAMP: {timestamp} ***")  
+    logger.info(f"*** FILE: {file} ***")
     return await textfile_to_emo(file, longitude, latitude, timestamp)
 
  

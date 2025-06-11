@@ -309,6 +309,8 @@ async def textfile_to_emo(file, longitude, latitude, timestamp):
         "emotions": emotions.get("emotions")
     }
 
+    logger.info(f"*** DATA: {data} ***")
+
     json_path = os.path.join(temp_dir, "result.json")
     with open(json_path, "w") as f:
         json.dump(data, f)
