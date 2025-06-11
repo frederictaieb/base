@@ -15,7 +15,7 @@ class CustomFormatter(logging.Formatter):
         if record.levelno == logging.INFO:
             levelname = f"[{self.GREEN}{levelname}{self.RESET}]"
         filename_colored = f"[{self.YELLOW}{record.filename}{self.RESET}]"
-        base_msg = f"{dt_colored} {levelname} {filename_colored}: {record.getMessage()}"
+        base_msg = f"{dt_colored} {levelname} {filename_colored}: \n{record.getMessage()}\n"
         return base_msg
 
 def setup_logging(level=logging.INFO):
