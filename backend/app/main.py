@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
-from app.services import xrp_services
+from app.services.blockchain import xrp_services
 
 import asyncio
 from app.config.logging_config import setup_logging
-from app.services import humeai_services
 import logging
 from app.config.settings import settings
 

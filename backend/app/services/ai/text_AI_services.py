@@ -15,7 +15,7 @@ import io
 import tempfile
 import asyncio
 
-from app.services.ipfs_services import upload_file
+from app.services.storage.ipfs_services import upload_file
 
 import mimetypes
 import shutil
@@ -32,7 +32,7 @@ import requests
 
 from app.config.logging_config import setup_logging
 
-from app.services.xrp_services import xrp_emitter
+from app.services.blockchain.xrp_services import xrp_emitter
 
 
 setup_logging()

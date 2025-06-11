@@ -2,6 +2,7 @@
 import logging
 from pprint import pformat
 
+
 class CustomFormatter(logging.Formatter):
     GREEN = "\033[92m"   # Vert pour INFO
     YELLOW = "\033[93m"  # Jaune pour le nom de fichier
@@ -11,7 +12,7 @@ class CustomFormatter(logging.Formatter):
     MAGENTA = "\033[95m" # Magenta pour WARNING
     WHITE = "\033[97m"   # Blanc pour CRITICAL
     BOLD = "\033[1m"     # Gras pour les niveaux importants
-    RESET = "\033[0m"
+    RESET = "\033[0m"    # Reset pour la couleur
 
     def format(self, record):
         dt = self.formatTime(record, datefmt="%d/%m/%y - %H:%M:%S")

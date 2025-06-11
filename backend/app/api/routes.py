@@ -2,8 +2,8 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Up
 from fastapi.responses import JSONResponse
 
 from app.models.markers import markers, Marker
-from app.services.markers_services import markersManager
-from app.services.text_AI_services import textfile_to_emo, textfile_to_summary, textfile_to_wisdom, textfile_to_heatmap
+from app.services.r3f.markers_services import markersManager
+from app.services.ai.text_AI_services import textfile_to_emo, textfile_to_summary, textfile_to_wisdom, textfile_to_heatmap
 
 from pydantic import BaseModel
 from typing import Dict, List

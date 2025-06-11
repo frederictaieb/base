@@ -1,3 +1,7 @@
+import os
+import uuid
+import tempfile
+import shutil
 import websockets
 import json
 import logging
@@ -5,12 +9,7 @@ from app.config.settings import settings
 from app.config.logging_config import setup_logging
 from app.models.markers import Marker
 from app.utils.utils import parse_memo
-from app.services import ipfs_services
-import uuid
-import tempfile
-import shutil
-
-import os
+from app.services.storage import ipfs_services
 from dotenv import load_dotenv
 from xrpl.wallet import Wallet
 from xrpl.constants import CryptoAlgorithm
@@ -29,7 +28,7 @@ XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
 
 async def xrp_listener():
     from app.api.routes import add_marker 
-    from app.models.markers import Location, Emotions, Wisdom
+    from app.models.markers import Location
 
     if not SERVER_ADDRESS or not XRP_WS_URI:
         logger.error("❌ SERVER_ADDRESS ou XRP_WS_URI missing in .env")
@@ -82,18 +81,6 @@ async def xrp_listener():
 
                     await add_marker(Marker(
                         location=location,
-
-                        emotions=Emotions(
-                            joy=0,
-                            sadness=0,
-                            anger=0,
-                            fear=0
-                        ),
-                        wisdom=Wisdom(
-                            sentence_1="",
-                            sentence_2="",
-                            sentence_3="",
-                        ),
                     ))
                     shutil.rmtree(temp_dir)
     except Exception as e:
