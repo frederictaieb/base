@@ -37,7 +37,7 @@ const TextFilePage: React.FC = () => {
         setLocationError("");
       },
       (err) => {
-        setLocationError("Impossible d'obtenir la position.");
+        setLocationError("Impossible d'obtenir la position: " + err.message);
       }
     );
   };
@@ -67,7 +67,7 @@ const TextFilePage: React.FC = () => {
       formData.append("timestamp", timestamp || "");
     }
 
-    console.log([...formData.entries()])
+    console.log("formData", formData);
 
     try {
       const response = await axios.post(

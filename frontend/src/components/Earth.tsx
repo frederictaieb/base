@@ -27,13 +27,23 @@ const Earth: React.FC = () => {
       if (data.type === "init") {
         // Reçoit tous les points actuels à la connexion
         console.log("Importing all Markers")
-        const points = data.markers.map((m:any) =>m.localisations);
+        //const points = data.markers.map((m:any) =>m.locations);
+        const points = data.markers.map((m:any) => ({
+          lat: m.location.latitude,
+          lng: m.location.longitude,
+        }));
         //data.inner_weathers.map((iw: any) => iw.point);
         setPoints(points);
       } else {
         // Reçoit un nouveau point en temps réel
         console.log("New Marker Received");
-        setPoints(prev => [...prev, data.localisation]);
+        //setPoints(prev => [...prev, data.location]);
+        const newPoint: Point = {
+          lat: data.location.latitude,
+          lng: data.location.longitude,
+          // ...add other required properties here
+        };
+        setPoints(prev => [...prev, newPoint]);
       }
     };
 

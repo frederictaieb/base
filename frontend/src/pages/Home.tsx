@@ -1,13 +1,13 @@
 import '../App.css';
 import React from 'react';
 import Earth from '../components/Earth';
-import AddMarkerDrawer from './AddMarker'
+import SendTextfile from './SendTextfile'
 
 const Home: React.FC = () => {
   return (
     <div id="canvas-container" style={{ position: "relative" }}>
       <Earth />
-      <AddMarkerDrawer isOpen={false} onClose={() => {}} />
+      <SendTextfile isOpen={false} onClose={() => {}} />
     </div>
   );
 };

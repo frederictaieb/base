@@ -1,10 +1,9 @@
 import React, { useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import AddMarkerDrawer from "./pages/AddMarker";
+import SendTextfile from "./pages/SendTextfile";
 import Navbar from "./components/Navbar";
 import RadioPlayer from "./components/RadioPlayer";
-import TextFilePage from "./pages/textfile";
 
 const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -74,10 +73,9 @@ const App: React.FC = () => {
         isFading={isFading}
       />
       <RadioPlayer audioRef={audioRef} />
-      <AddMarkerDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <SendTextfile isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/textfile" element={<TextFilePage />} />
       </Routes>
     </Router>
   );

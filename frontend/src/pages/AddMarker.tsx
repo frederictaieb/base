@@ -3,8 +3,8 @@ import Drawer from "../components/Drawer";
 
 const AddMarkerDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [form, setForm] = useState({
-    lat: "51.5074",
-    lng: "-0.1278",
+    latitude: "40.7128",
+    longitude: "74.0060",
     joy: "1",
     sadness: "2",
     anger: "0",
@@ -27,7 +27,7 @@ const AddMarkerDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          gps: { lat: parseFloat(form.lat), lng: parseFloat(form.lng) },
+          location: { latitude: parseFloat(form.latitude), longitude: parseFloat(form.longitude) },
           emotions: {
             joy: parseInt(form.joy),
             sadness: parseInt(form.sadness),
@@ -58,11 +58,11 @@ const AddMarkerDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
         {/* Ligne 1 */}
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium text-white">Latitude</span>
-          <input type="number" step="any" name="lat" value={form.lat} onChange={handleChange} required className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+          <input type="number" step="any" name="latitude" value={form.latitude} onChange={handleChange} required className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:outline-none" />
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium text-white">Longitude</span>
-          <input type="number" step="any" name="lng" value={form.lng} onChange={handleChange} required className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+          <input type="number" step="any" name="longitude" value={form.longitude} onChange={handleChange} required className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:outline-none" />
         </label>
         {/* Ligne 2 */}
         <label className="flex flex-col gap-1">
