@@ -13,6 +13,7 @@ import os
 import uuid
 import io
 import tempfile
+import asyncio
 
 from app.services.ipfs_services import upload_directory, upload_file, download_file
 
@@ -31,7 +32,8 @@ import requests
 
 from app.config.logging_config import setup_logging
 
-import ipfshttpclient
+from app.services.xrp_services import xrp_emitter
+
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -317,6 +319,9 @@ async def textfile_to_emo(file, longitude, latitude, timestamp):
     text_to_heatmap(emotions.get("emotions"), output_path=heatmap_path, to_save=True)
     heatmap_hash = upload_file(heatmap_path)
     logger.info(f"*** HEATMAP HASH: {heatmap_hash} ***")
+
+    asyncio.create_task(asyncio.to_thread(xrp_emitter, json_hash, heatmap_hash))
+    #xrp_emitter(json_hash, heatmap_hash)
 
     shutil.rmtree(temp_dir)
 
