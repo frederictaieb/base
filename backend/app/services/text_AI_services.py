@@ -10,9 +10,11 @@ import matplotlib.colors as mcolors
 import mimetypes
 import shutil
 import os
-
+import uuid
 import io
+import tempfile
 
+from app.services.ipfs_services import upload_directory, upload_file, download_file
 
 import mimetypes
 import shutil
@@ -28,6 +30,8 @@ import spacy
 import requests
 
 from app.config.logging_config import setup_logging
+
+import ipfshttpclient
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -281,19 +285,42 @@ async def textfile_to_heatmap(file):
 # TO TXT TO EMO
 # Take a file
 # Return a dictionary with summary, wisdom and emotions
-async def textfile_to_emo(file):
+async def textfile_to_emo(file, longitude, latitude, timestamp):
+
+    id = str(uuid.uuid4())
+    temp_dir = tempfile.mkdtemp(prefix=id)
+
     texte = await scrub(file)
 
     summary = await text_to_summary(texte)
     wisdom = await text_to_wisdom(texte)
     emotions = await text_to_emotions(texte)
-    text_to_heatmap(emotions.get("emotions"), output_path="heatmap.png", to_save=True)
 
-
-    return {
+    data =  {
+        "timestamp": timestamp,
+        "location": {
+            "longitude": longitude,
+            "latitude": latitude
+        },
         "summary": summary.get("summary"), 
         "wisdom": wisdom.get("wisdom"),
         "emotions": emotions.get("emotions")
     }
 
+    json_path = os.path.join(temp_dir, "result.json")
+    with open(json_path, "w") as f:
+        json.dump(data, f)
+    json_hash = upload_file(json_path)
+    logger.info(f"*** JSON HASH: {json_hash} ***")
 
+    heatmap_path = os.path.join(temp_dir, "heatmap.png")
+    text_to_heatmap(emotions.get("emotions"), output_path=heatmap_path, to_save=True)
+    heatmap_hash = upload_file(heatmap_path)
+    logger.info(f"*** HEATMAP HASH: {heatmap_hash} ***")
+
+    shutil.rmtree(temp_dir)
+
+    return {
+        "json_hash": json_hash,
+        "heatmap_hash": heatmap_hash
+    }

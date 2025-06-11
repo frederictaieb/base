@@ -1,10 +1,20 @@
 import os
 import requests
-from config import settings
+from app.config.settings import settings
+import ipfshttpclient
 
 IPFS_API_URL = settings.IPFS_API_URL
 IPFS_GATEWAY_URL = settings.IPFS_GATEWAY_URL
 TIMEOUT = settings.TIMEOUT
+IPFS_IP = settings.IPFS_IP
+IPFS_PORT = settings.IPFS_PORT
+
+def upload_directory(directory_path):
+    client = ipfshttpclient.connect(f"/ip4/{IPFS_IP}/tcp/{IPFS_PORT}/http")
+    res = client.add(directory_path, recursive=True)
+    root = res[-1]
+    return root["Hash"]
+
 
 def upload_file(file_path):
     if not os.path.exists(file_path):
@@ -14,7 +24,7 @@ def upload_file(file_path):
             response = requests.post(
                 f"{IPFS_API_URL}/api/v0/add",
                 files={'file': file},
-                timeout=TIMEOUT
+                timeout=int(TIMEOUT)
             )
         response.raise_for_status()
         data = response.json()

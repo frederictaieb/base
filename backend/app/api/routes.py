@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.models.markers import markers, Marker
 from app.services.markers_services import markersManager
-from app.services.analysis_services import textfile_to_emo, textfile_to_summary, textfile_to_wisdom, textfile_to_emotions, textfile_to_heatmap
+from app.services.text_AI_services import textfile_to_emo, textfile_to_summary, textfile_to_wisdom, textfile_to_heatmap
 
 from pydantic import BaseModel
 from typing import Dict, List
@@ -44,6 +44,10 @@ class EmoResponse(BaseModel):
     wisdom: List[str]
     emotions: List[PhraseEmotions] 
 
+class HashesResponse(BaseModel):
+    json_hash: str
+    heatmap_hash: str
+
 # Take a list of lines
 # Return a summary
 @router.post("/text_to_summary", response_model=OutputData)
@@ -65,9 +69,10 @@ async def textfile_to_heatmap_endpoint(file: UploadFile = File(...)):
 
 # Take a file
 # Return emotionnal analysis, including summary, wisdom, emotions and heatmap
-@router.post("/textfile_to_emo", response_model=EmoResponse)
-async def textfile_to_emo_endpoint(file: UploadFile = File(...)):
-    return await textfile_to_emo(file)
+#@router.post("/textfile_to_emo", response_model=EmoResponse)
+@router.post("/textfile_to_emo", response_model=HashesResponse)
+async def textfile_to_emo_endpoint(file: UploadFile = File(...), longitude: float = 0, latitude: float = 0, timestamp: str = ""):
+    return await textfile_to_emo(file, longitude, latitude, timestamp)
 
  
 @router.get("/markers")
