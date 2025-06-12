@@ -10,14 +10,7 @@ from app.config.logging_config import setup_logging
 from app.models.markers import Marker
 from app.utils.utils import parse_memo
 from app.services.storage.ipfs.ipfs_download import download_file
-from dotenv import load_dotenv
-from xrpl.wallet import Wallet
-from xrpl.constants import CryptoAlgorithm
-from xrpl.clients import WebsocketClient
-from xrpl.models.transactions import Payment, Memo
-from xrpl.utils import xrp_to_drops
-from xrpl.transaction import autofill_and_sign
-from xrpl.transaction import submit_and_wait
+
 
 setup_logging()
 logger = logging.getLogger(__name__)
