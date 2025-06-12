@@ -14,24 +14,19 @@ import uuid
 import io
 import tempfile
 import asyncio
-
-from app.services.storage.ipfs_services import upload_file
-
 import mimetypes
 import shutil
-
 from pydantic import BaseModel
 from typing import Dict
-
 import logging
 import re
-
 import spacy
 import requests
-
 from app.config.logging_config import setup_logging
+from app.services.storage.ipfs.ipfs_upload import upload_file
+from app.services.storage.ipfs.ipfs_download import download_file
+from app.services.storage.xrp.xrp_emitter import xrp_emitter
 
-from app.services.blockchain.xrp_emitter import xrp_emitter
 
 
 setup_logging()

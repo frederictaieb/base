@@ -5,7 +5,8 @@ from app.config.settings import settings
 from app.config.logging_config import setup_logging
 from app.models.markers import Marker
 from app.utils.utils import parse_memo
-from app.services.storage import ipfs_services
+from app.services.storage.ipfs.ipfs_upload import upload_file
+from app.services.storage.ipfs.ipfs_download import download_file   
 from dotenv import load_dotenv
 from xrpl.wallet import Wallet
 from xrpl.constants import CryptoAlgorithm

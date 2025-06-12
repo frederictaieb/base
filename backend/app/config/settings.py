@@ -12,7 +12,7 @@ class Settings:
     #IPFS settings
     IPFS_API_URL = os.getenv("IPFS_API_URL")
     IPFS_GATEWAY_URL = os.getenv("IPFS_GATEWAY_URL")
-    TIMEOUT = os.getenv("TIMEOUT")
+    IPFS_TIMEOUT = os.getenv("IPFS_TIMEOUT")
     IPFS_IP = os.getenv("IPFS_IP")
     IPFS_PORT = os.getenv("IPFS_PORT")
 

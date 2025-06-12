@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
-from app.services.blockchain.xrp_listener import xrp_listener
+from app.services.storage.xrp.xrp_listener import xrp_listener
 
 import asyncio
 from app.config.logging_config import setup_logging

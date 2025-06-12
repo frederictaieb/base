@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 IPFS_API_URL = settings.IPFS_API_URL
 IPFS_GATEWAY_URL = settings.IPFS_GATEWAY_URL
-TIMEOUT = settings.TIMEOUT
+IPFS_TIMEOUT = settings.IPFS_TIMEOUT
 IPFS_IP = settings.IPFS_IP
 IPFS_PORT = settings.IPFS_PORT
 
@@ -21,7 +21,7 @@ def upload_file(file_path):
             response = requests.post(
                 f"{IPFS_API_URL}/api/v0/add",
                 files={'file': file},
-                timeout=int(TIMEOUT)
+                timeout=int(IPFS_TIMEOUT)
             )
         response.raise_for_status()
         data = response.json()
