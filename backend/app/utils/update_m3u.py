@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 SERVER_ADDRESS = settings.XRP_SERVER_WALLET_ADDR
 XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
+IPFS_GATEWAY_URL = settings.IPFS_GATEWAY_URL
+
+ipfs_gateway_root = IPFS_GATEWAY_URL.rstrip('/') + "/ipfs/"
+logger.info(f"IPFS Gateway Root: {ipfs_gateway_root}")
 
 async def xrp_wisdom_listener():
     if not SERVER_ADDRESS or not XRP_WS_URI:
@@ -40,20 +44,19 @@ async def xrp_wisdom_listener():
                 if data.get("type") == "transaction":
                     tx_hash = data.get("transaction", {}).get("hash")
                     logger.info(f"✅ Transaction detected: {tx_hash[:21]}[...]")
+
                     parsed_memos = parse_memo(data["transaction"]["Memos"])
                     logger.info(f"📝 Parsed memo: {parsed_memos}")
 
-                    if parsed_memos.get("wisdom_0_hash"):
-                        wisdom_0_hash = parsed_memos.get("wisdom_0_hash")
-                        logger.info(f"*** WISDOM 0 HASH: {wisdom_0_hash} ***")
-                    
-                    if parsed_memos.get("wisdom_1_hash"):
-                        wisdom_1_hash = parsed_memos.get("wisdom_1_hash")
-                        logger.info(f"*** WISDOM 1 HASH: {wisdom_1_hash} ***")
-                    
-                    if parsed_memos.get("wisdom_2_hash"):
-                        wisdom_2_hash = parsed_memos.get("wisdom_2_hash")
-                        logger.info(f"*** WISDOM 2 HASH: {wisdom_2_hash} ***")
+                    with open("wisdom_hashes.txt", "a") as f:
+                        for i in range(3):
+                            key = f"wisdom_{i}_hash"
+                            if parsed_memos.get(key):
+                                hash_value = parsed_memos[key]
+                                ipfs_cid = f"{ipfs_gateway_root}{hash_value}"
+                                logger.info(f"*** WISDOM {i} IPFS_CID: {ipfs_cid} ***")
+                                f.write(f"{ipfs_cid}\n")
+
 
     except Exception as e:
         logger.error(f"❌ Error in XRP Listener : {e}")
