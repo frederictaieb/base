@@ -49,17 +49,29 @@ async def xrp_listener():
                     if parsed_memos.get("json_hash"):
                         json_hash = parsed_memos.get("json_hash")
                         heatmap_hash = parsed_memos.get("heatmap_hash")
+                        wisdom_0_hash = parsed_memos.get("wisdom_0_hash")
+                        wisdom_1_hash = parsed_memos.get("wisdom_1_hash")
+                        wisdom_2_hash = parsed_memos.get("wisdom_2_hash")
 
                         id = str(uuid.uuid4())
                         temp_dir = tempfile.mkdtemp(prefix=id)
                         json_path = os.path.join(temp_dir, "json_hash.json")
                         heatmap_path = os.path.join(temp_dir, "heatmap_hash.png")
+                        wisdom_0_path = os.path.join(temp_dir, "wisdom_0_hash.mp3")
+                        wisdom_1_path = os.path.join(temp_dir, "wisdom_1_hash.mp3")
+                        wisdom_2_path = os.path.join(temp_dir, "wisdom_2_hash.mp3")
                         
                         download_file(json_hash,  json_path)
                         logger.info(f"Downloaded json file to {json_path}")
                         download_file(heatmap_hash, heatmap_path)
                         logger.info(f"Downloaded heatmap file to {heatmap_path}")
-                        
+                        download_file(wisdom_0_hash, wisdom_0_path)
+                        logger.info(f"Downloaded wisdom_0 file to {wisdom_0_path}")
+                        download_file(wisdom_1_hash, wisdom_1_path)
+                        logger.info(f"Downloaded wisdom_1 file to {wisdom_1_path}")
+                        download_file(wisdom_2_hash, wisdom_2_path)
+                        logger.info(f"Downloaded wisdom_2 file to {wisdom_2_path}")
+
                         with open(json_path, "r") as f:
                             json_data = json.load(f)
                         logger.info(f"JSON data: {json_data}")

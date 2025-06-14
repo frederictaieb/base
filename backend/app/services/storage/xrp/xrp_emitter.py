@@ -20,10 +20,13 @@ logger = logging.getLogger(__name__)
 SERVER_ADDRESS = settings.XRP_SERVER_WALLET_ADDR
 XRP_WS_URI = settings.XRP_TESTNET_ADDR_WS
 
-def xrp_emitter(json_hash, heatmap_hash):
+def xrp_emitter(json_hash, heatmap_hash, wisdom_0_hash, wisdom_1_hash, wisdom_2_hash):
     memo_data = {
         "json_hash": json_hash,
-        "heatmap_hash": heatmap_hash
+        "heatmap_hash": heatmap_hash,
+        "wisdom_0_hash": wisdom_0_hash,
+        "wisdom_1_hash": wisdom_1_hash,
+        "wisdom_2_hash": wisdom_2_hash
     }
     memo_json = json.dumps(memo_data)
     memo_hex = memo_json.encode('utf-8').hex()

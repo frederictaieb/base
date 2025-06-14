@@ -98,7 +98,7 @@ const SendTextfile: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
     formData.append("timestamp", currentTimestamp);
 
     try {
-      const response = await axios.post("http://localhost:8000/textfile_to_emo", formData, {
+      const response = await axios.post("http://localhost:8000/textfile_to_xrp", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

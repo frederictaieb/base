@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.models.markers import markers, Marker
 from app.services.r3f.markers_services import markersManager
-from app.services.ai.text.text_AI_services import textfile_to_emo, textfile_to_summary, textfile_to_wisdom, textfile_to_heatmap
+from app.services.ai.text.text_AI_services import textfile_to_xrp, textfile_to_summary, textfile_to_wisdom, textfile_to_heatmap, wisdom_to_audio
 
 from pydantic import BaseModel
 from typing import Dict, List
@@ -14,6 +14,9 @@ import logging
 from app.config.logging_config import setup_logging
 
 from transformers import pipeline
+
+import os
+from fastapi.responses import FileResponse
 
 class TextInput(BaseModel):
     text: str
@@ -47,6 +50,9 @@ class EmoResponse(BaseModel):
 class HashesResponse(BaseModel):
     json_hash: str
     heatmap_hash: str
+    wisdom_0_hash: str
+    wisdom_1_hash: str
+    wisdom_2_hash: str
 
 # Take a list of lines
 # Return a summary
@@ -67,11 +73,15 @@ async def textfile_to_heatmap_endpoint(file: UploadFile = File(...)):
     buffer = await textfile_to_heatmap(file)
     return StreamingResponse(buffer, media_type="image/png")
 
+@router.post("/wisdom_to_audio")
+async def wisdom_to_audio_endpoint(wisdom: str = Form(...)):
+    pass
+
 # Take a file
 # Return emotionnal analysis, including summary, wisdom, emotions and heatmap
 #@router.post("/textfile_to_emo", response_model=EmoResponse)
-@router.post("/textfile_to_emo", response_model=HashesResponse)
-async def textfile_to_emo_endpoint(
+@router.post("/textfile_to_xrp", response_model=HashesResponse)
+async def textfile_to_xrp_endpoint(
     file: UploadFile = File(...),
     longitude: float = Form(0),
     latitude: float = Form(0),
@@ -81,9 +91,9 @@ async def textfile_to_emo_endpoint(
     logger.info(f"*** LATITUDE: {latitude} ***")
     logger.info(f"*** TIMESTAMP: {timestamp} ***")  
     logger.info(f"*** FILE: {file} ***")
-    return await textfile_to_emo(file, longitude, latitude, timestamp)
+    return await textfile_to_xrp(file, longitude, latitude, timestamp)
 
- 
+
 @router.get("/markers")
 def get_markers():
     return markers

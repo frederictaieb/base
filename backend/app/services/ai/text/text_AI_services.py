@@ -26,6 +26,7 @@ from app.config.logging_config import setup_logging
 from app.services.storage.ipfs.ipfs_upload import upload_file
 from app.services.storage.ipfs.ipfs_download import download_file
 from app.services.storage.xrp.xrp_emitter import xrp_emitter
+from gtts import gTTS
 
 
 
@@ -197,6 +198,15 @@ async def text_to_emotions(text: str) -> list[str]:
     logger.info(f"*** TO EMOTIONS: {json_lines} ***")
     return {"emotions": json_lines}
  
+
+# Exemple de fonction text-to-audio (à remplacer par ta vraie logique TTS)
+async def wisdom_to_audio(text: str, output_path: str) -> str:
+    logger.info(f"*** WISDOM TO AUDIO: {text} ***")
+    tts = gTTS(text, lang="fr")
+    tts.save(output_path)
+    return output_path
+
+
 # TO EMOTIONS
 # Take a file
 # Return a list of emotions
@@ -281,7 +291,7 @@ async def textfile_to_heatmap(file):
 # TO TXT TO EMO
 # Take a file
 # Return a dictionary with summary, wisdom and emotions
-async def textfile_to_emo(file, longitude, latitude, timestamp):
+async def textfile_to_xrp(file, longitude, latitude, timestamp):
 
     id = str(uuid.uuid4())
     temp_dir = tempfile.mkdtemp(prefix=id)
@@ -289,7 +299,26 @@ async def textfile_to_emo(file, longitude, latitude, timestamp):
     texte = await scrub(file)
 
     summary = await text_to_summary(texte)
+
     wisdom = await text_to_wisdom(texte)
+
+    wisdom_0_path = os.path.join(temp_dir, "wisdom0.mp3")
+    wisdom_1_path = os.path.join(temp_dir, "wisdom1.mp3")
+    wisdom_2_path = os.path.join(temp_dir, "wisdom2.mp3")
+
+    wisdom_list = wisdom.get("wisdom", [])
+    await wisdom_to_audio(wisdom_list[0], wisdom_0_path)
+    await wisdom_to_audio(wisdom_list[1], wisdom_1_path)
+    await wisdom_to_audio(wisdom_list[2], wisdom_2_path)
+
+    wisdom_0_hash = upload_file(wisdom_0_path)
+    wisdom_1_hash = upload_file(wisdom_1_path)
+    wisdom_2_hash = upload_file(wisdom_2_path)
+
+    logger.info(f"*** WISDOM 0 HASH: {wisdom_0_hash} ***")
+    logger.info(f"*** WISDOM 1 HASH: {wisdom_1_hash} ***")
+    logger.info(f"*** WISDOM 2 HASH: {wisdom_2_hash} ***")
+   
     emotions = await text_to_emotions(texte)
 
     data =  {
@@ -316,12 +345,15 @@ async def textfile_to_emo(file, longitude, latitude, timestamp):
     heatmap_hash = upload_file(heatmap_path)
     logger.info(f"*** HEATMAP HASH: {heatmap_hash} ***")
 
-    asyncio.create_task(asyncio.to_thread(xrp_emitter, json_hash, heatmap_hash))
+    asyncio.create_task(asyncio.to_thread(xrp_emitter, json_hash, heatmap_hash, wisdom_0_hash, wisdom_1_hash, wisdom_2_hash))
     #xrp_emitter(json_hash, heatmap_hash)
 
     shutil.rmtree(temp_dir)
 
     return {
         "json_hash": json_hash,
-        "heatmap_hash": heatmap_hash
+        "heatmap_hash": heatmap_hash,
+        "wisdom_0_hash": wisdom_0_hash,
+        "wisdom_1_hash": wisdom_1_hash,
+        "wisdom_2_hash": wisdom_2_hash
     }
