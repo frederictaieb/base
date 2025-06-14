@@ -1,34 +1,34 @@
-settings.init.allow_root := true
-#log.file.path.set("basic-radio.log")
+set("log.level", 3)
 
-#Silence
-src_blank =  blank()
+# Source de secours
+src_blank = blank()
 
-#Playlist musics
-src_musics = playlist(
-  mode="random",
-  reload_mode="watch",
-  "musics_ipfs.m3u"
-)
+# Playlist locale
+src_musics = playlist("/opt/eaim/radio/musics_ipfs.m3u", reload_mode="watch", mode="random")
+
+# Fallback en cas de problème
 musics = fallback(track_sensitive=false, [src_musics, src_blank])
 
-#Playlist wisdoms
-src_wisdoms = playlist(
-  mode="random",
-  reload_mode="watch",
-  "wisdoms_ipfs.m3u"
-)
+# Playlist des paroles de sagesse
+src_wisdoms = playlist("/opt/eaim/radio/wisdoms_ipfs.m3u", reload_mode="watch", mode="random")
 
-wisdoms = fallback(track_sensitive=false, [src_wisdoms, src_blank])
+# Insertion aléatoire de wisdoms : lecture toutes les 60 à 180 secondes
+wisdoms = delay(20., src_wisdoms)
 
-mix = add([delay(180., wisdoms), musics])
+#wisdoms_loop = loop(wisdoms_with_delay)
 
-# Envoi au stream ou à la sortie
-output.icecast(
-  %mp3,
-  host="163.172.162.144",
-  port=8001,
-  password="hackme",
-  mount="/eaim",
-  mix
+# Mixage audio : superposition (add) des deux sources normalisées
+mixed = add([normalize(musics), normalize(wisdoms)])
+
+# Diffusion vers Icecast
+output.icecast(%mp3,
+  host = "localhost",
+  port = 8001,
+  password = "hackme",
+  mount = "eaim",
+  name = "Ma webradio test",
+  description = "Test depuis Liquidsoap",
+  genre = "test",
+  url = "http://localhost:8001",
+  mixed
 )
